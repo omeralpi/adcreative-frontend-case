@@ -36,15 +36,6 @@ export interface AsyncMultiSelectRef {
   input: HTMLInputElement;
 }
 
-export function filterOptionsWithoutPicked(
-  options: OptionList,
-  picked: OptionList,
-) {
-  const pickedValues = new Set(picked.map((p) => p.value));
-
-  return options.filter((option) => !pickedValues.has(option.value));
-}
-
 const AsyncMultiSelect = React.forwardRef<
   AsyncMultiSelectRef,
   AsyncMultiSelectProps
@@ -94,12 +85,6 @@ const AsyncMultiSelect = React.forwardRef<
       },
       [selected, onChange],
     );
-
-    const filterAvailableOptions = React.useMemo<OptionList>(() => {
-      // TODO: Implement infinite scroll to handle items beyond the initial 20 fetched from the API, to avoid hiding selected items in the list.
-
-      return filterOptionsWithoutPicked(options, selected);
-    }, [options, selected]);
 
     const handleKeyDown = React.useCallback(
       (e: React.KeyboardEvent<HTMLDivElement>) => {
