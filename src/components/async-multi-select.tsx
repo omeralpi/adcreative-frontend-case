@@ -44,7 +44,7 @@ export function filterOptionsWithoutPicked(
   return options.filter((option) => !pickedValues.has(option.value));
 }
 
-export const AsyncMultiSelect = React.forwardRef<
+const AsyncMultiSelect = React.forwardRef<
   AsyncMultiSelectRef,
   AsyncMultiSelectProps
 >(
@@ -291,3 +291,7 @@ export const AsyncMultiSelect = React.forwardRef<
     );
   },
 );
+
+AsyncMultiSelect.displayName = "AsyncMultiSelect";
+
+export { AsyncMultiSelect };

@@ -13,15 +13,15 @@ export interface IGetCharactersResponse {
   }[];
 }
 
-export const getCharacters = async (
-  payload: IGetCharactersPayload,
-): Promise<IGetCharactersResponse> => {
-  const response = await fetch("https://rickandmortyapi.com/api/character", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+export const getCharacters = async ({
+  params,
+}: IGetCharactersPayload): Promise<IGetCharactersResponse> => {
+  const queryParams = new URLSearchParams(params).toString();
+
+  const response = await fetch(
+    `https://rickandmortyapi.com/api/character?${queryParams}`,
+  );
+
   const data = await response.json();
   return data;
 };
