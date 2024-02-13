@@ -14,6 +14,7 @@ import { Command as CommandPrimitive } from "cmdk";
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { TextHighlighter } from "./text-highlighter";
+import { Checkbox } from "./ui/checkbox";
 
 export interface Option {
   value: string;
@@ -119,7 +120,7 @@ const AsyncMultiSelect = React.forwardRef<
             input.blur();
             break;
           case "Tab":
-            if (filterAvailableOptions.length > 0) {
+            if (options.length > 0) {
               e.preventDefault();
 
               const hasFocusValue = document
@@ -127,12 +128,21 @@ const AsyncMultiSelect = React.forwardRef<
                 ?.getAttribute("data-value");
 
               if (hasFocusValue) {
-                const option = filterAvailableOptions.find(
+                const focusedOption = options.find(
                   (o) => o.value === hasFocusValue,
                 );
 
-                if (option) {
-                  handleSelect(option);
+                if (focusedOption) {
+                  const isSelected =
+                    selected.findIndex(
+                      (s) => s.value === focusedOption.value,
+                    ) !== -1;
+
+                  if (isSelected) {
+                    handleUnselect(focusedOption);
+                  } else {
+                    handleSelect(focusedOption);
+                  }
                 }
               }
             }
@@ -141,7 +151,7 @@ const AsyncMultiSelect = React.forwardRef<
             break;
         }
       },
-      [selected, filterAvailableOptions],
+      [selected, options],
     );
 
     useEffect(() => {
@@ -244,9 +254,13 @@ const AsyncMultiSelect = React.forwardRef<
                 <p className="py-5 text-center text-muted">Loading...</p>
               )}
               {EmptyItem()}
-              {filterAvailableOptions.length > 0 ? (
+              {options.length > 0 ? (
                 <CommandGroup className="h-full overflow-auto">
-                  {filterAvailableOptions.map((option) => {
+                  {options.map((option) => {
+                    const isSelected =
+                      selected.findIndex((s) => s.value === option.value) !==
+                      -1;
+
                     return (
                       <CommandItem
                         key={option.value}
@@ -255,9 +269,19 @@ const AsyncMultiSelect = React.forwardRef<
                           e.preventDefault();
                           e.stopPropagation();
                         }}
-                        onSelect={() => handleSelect(option)}
+                        onSelect={() => {
+                          if (isSelected) {
+                            handleUnselect(option);
+                          } else {
+                            handleSelect(option);
+                          }
+                        }}
                         className={"cursor-pointer"}>
                         <div className="flex items-center gap-2">
+                          <Checkbox
+                            checked={isSelected}
+                            className="checkbox-sm"
+                          />
                           {option.image && (
                             <img
                               src={option.image}
