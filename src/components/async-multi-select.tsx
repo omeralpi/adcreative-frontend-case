@@ -15,6 +15,7 @@ import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { TextHighlighter } from "./text-highlighter";
 import { Checkbox } from "./ui/checkbox";
+import { Skeleton } from "./ui/skeleton";
 
 export interface Option {
   value: string;
@@ -78,17 +79,13 @@ const AsyncMultiSelect = React.forwardRef<
 
     const handleSelect = React.useCallback(
       (option: Option) => {
-        setSearch("");
+        // setSearch(""); // May be useful to clear the search input after selecting an option
         const newSelected = [...selected, option];
         setSelected(newSelected);
         onChange?.(newSelected);
       },
       [selected, onChange],
     );
-
-    const isSelected = (value: Option["value"]) => {
-      return selected.findIndex((s) => s.value === value) !== -1;
-    };
 
     const handleKeyDown = React.useCallback(
       (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -140,6 +137,10 @@ const AsyncMultiSelect = React.forwardRef<
       [selected, options],
     );
 
+    const isSelected = (value: Option["value"]) => {
+      return selected.findIndex((s) => s.value === value) !== -1;
+    };
+
     useEffect(() => {
       const updateSelectedValueWhenValueChanged = () => {
         if (value) {
@@ -153,6 +154,7 @@ const AsyncMultiSelect = React.forwardRef<
     useEffect(() => {
       const doSearch = async () => {
         setIsLoading(true);
+        await new Promise((r) => setTimeout(r, 500)); // Simulate a delay
         const res = await onSearch(search);
         setOptions(res);
         setIsLoading(false);
@@ -236,62 +238,73 @@ const AsyncMultiSelect = React.forwardRef<
         <div className="relative mt-2">
           {open && (
             <CommandList className="absolute top-0 z-10 w-full rounded border bg-popover text-popover-foreground shadow-md outline-none animate-in">
-              {isLoading && (
-                <p className="py-5 text-center text-muted">Loading...</p>
-              )}
-              {EmptyItem()}
-              {options.length > 0 ? (
-                <CommandGroup className="h-full overflow-auto">
-                  {options.map((option) => {
-                    const optionSelected = isSelected(option.value);
+              {isLoading ? (
+                <div className="divide-y">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div className="p-2 flex gap-2 items-center" key={i}>
+                      <Skeleton className="w-4 h-4 rounded-sm" />
+                      <Skeleton className="w-10 h-10 rounded" />
+                      <div className="flex-1 space-y-1">
+                        <Skeleton className="h-4 w-[160px]" />
+                        <Skeleton className="h-4 w-[80px]" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {EmptyItem()}
+                  {options.length > 0 ? (
+                    <CommandGroup className="h-full overflow-auto">
+                      {options.map((option) => {
+                        const optionSelected = isSelected(option.value);
 
-                    return (
-                      <CommandItem
-                        key={option.value}
-                        value={option.value}
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                        onSelect={() => {
-                          if (optionSelected) {
-                            handleUnselect(option);
-                          } else {
-                            handleSelect(option);
-                          }
-                        }}
-                        className={"cursor-pointer"}>
-                        <div className="flex items-center gap-2">
-                          <Checkbox
-                            checked={optionSelected}
-                            className="checkbox-sm"
-                          />
-                          {option.image && (
-                            <img
-                              src={option.image}
-                              alt={option.label}
-                              className="w-10 h-10 rounded"
-                            />
-                          )}
-                          <div>
-                            <p>
-                              <TextHighlighter
-                                text={option.label}
-                                searchText={search}
-                              />
-                            </p>
-                            {option.description && (
-                              <p className="text-sm text-muted">
-                                {option.description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              ) : null}
+                        return (
+                          <CommandItem
+                            key={option.value}
+                            value={option.value}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onSelect={() => {
+                              if (optionSelected) {
+                                handleUnselect(option);
+                              } else {
+                                handleSelect(option);
+                              }
+                            }}
+                            className={"cursor-pointer"}>
+                            <div className="flex items-center gap-2">
+                              <Checkbox checked={optionSelected} />
+                              {option.image && (
+                                <img
+                                  src={option.image}
+                                  alt={option.label}
+                                  className="w-10 h-10 rounded"
+                                />
+                              )}
+                              <div>
+                                <p>
+                                  <TextHighlighter
+                                    text={option.label}
+                                    searchText={search}
+                                  />
+                                </p>
+                                {option.description && (
+                                  <p className="text-sm text-muted">
+                                    {option.description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </CommandItem>
+                        );
+                      })}
+                    </CommandGroup>
+                  ) : null}
+                </>
+              )}
             </CommandList>
           )}
         </div>
