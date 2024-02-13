@@ -1,7 +1,7 @@
-const TextHighlighter: React.FC<{ text: string; searchText: string }> = ({
-  text,
-  searchText,
-}) => {
+export const TextHighlighter: React.FC<{
+  text: string;
+  searchText: string;
+}> = ({ text, searchText }) => {
   const index = text.toLowerCase().indexOf(searchText.toLowerCase());
   if (index === -1) return <>{text}</>;
 
