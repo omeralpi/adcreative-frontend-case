@@ -1,10 +1,11 @@
 "use client";
 
 import { getCharacters } from "@/api/services/get-characters";
-import { AsyncMultiSelect } from "@/components/async-multi-select";
+
+import { AsyncMultiSelect, type Option } from "@/components/async-multi-select";
 
 export default function Home() {
-  const handleSearch = async (value: string) => {
+  const handleSearch = async (value: string): Promise<Option[]> => {
     try {
       const response = await getCharacters({
         params: {
@@ -19,6 +20,8 @@ export default function Home() {
         description: `${character.episode.length} Episodes`,
       }));
     } catch (error) {
+      console.error("Error fetching characters:", error);
+
       return [];
     }
   };
