@@ -86,6 +86,10 @@ const AsyncMultiSelect = React.forwardRef<
       [selected, onChange],
     );
 
+    const isSelected = (value: Option["value"]) => {
+      return selected.findIndex((s) => s.value === value) !== -1;
+    };
+
     const handleKeyDown = React.useCallback(
       (e: React.KeyboardEvent<HTMLDivElement>) => {
         const input = inputRef.current;
@@ -112,23 +116,20 @@ const AsyncMultiSelect = React.forwardRef<
                 .querySelector("[aria-selected]")
                 ?.getAttribute("data-value");
 
-              if (hasFocusValue) {
-                const focusedOption = options.find(
-                  (o) => o.value === hasFocusValue,
-                );
+              if (!hasFocusValue) return;
 
-                if (focusedOption) {
-                  const isSelected =
-                    selected.findIndex(
-                      (s) => s.value === focusedOption.value,
-                    ) !== -1;
+              const focusedOption = options.find(
+                (o) => o.value === hasFocusValue,
+              );
 
-                  if (isSelected) {
-                    handleUnselect(focusedOption);
-                  } else {
-                    handleSelect(focusedOption);
-                  }
-                }
+              if (!focusedOption) return;
+
+              const optionSelected = isSelected(focusedOption.value);
+
+              if (optionSelected) {
+                handleUnselect(focusedOption);
+              } else {
+                handleSelect(focusedOption);
               }
             }
             break;
@@ -242,9 +243,7 @@ const AsyncMultiSelect = React.forwardRef<
               {options.length > 0 ? (
                 <CommandGroup className="h-full overflow-auto">
                   {options.map((option) => {
-                    const isSelected =
-                      selected.findIndex((s) => s.value === option.value) !==
-                      -1;
+                    const optionSelected = isSelected(option.value);
 
                     return (
                       <CommandItem
@@ -255,7 +254,7 @@ const AsyncMultiSelect = React.forwardRef<
                           e.stopPropagation();
                         }}
                         onSelect={() => {
-                          if (isSelected) {
+                          if (optionSelected) {
                             handleUnselect(option);
                           } else {
                             handleSelect(option);
@@ -264,7 +263,7 @@ const AsyncMultiSelect = React.forwardRef<
                         className={"cursor-pointer"}>
                         <div className="flex items-center gap-2">
                           <Checkbox
-                            checked={isSelected}
+                            checked={optionSelected}
                             className="checkbox-sm"
                           />
                           {option.image && (
